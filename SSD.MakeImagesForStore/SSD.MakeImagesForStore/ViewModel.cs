@@ -4,8 +4,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace SSD.MakeImagesForStore
@@ -18,9 +20,16 @@ namespace SSD.MakeImagesForStore
         private string _targetFilenameTemplate = string.Empty;
         private List<BitmapSize> _targetSizes = new List<BitmapSize>();
 
+        public ICommand MakeImagesCommand { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public ViewModel()
         {
             TargetFilenameTemplate = "output_";
+            MakeImagesCommand = new CommandMake(
+                p => MakeImages(), 
+                p => CanMakeImages());
 
             AddTargetSquareSize(310);
             AddTargetSquareSize(150);
@@ -42,8 +51,6 @@ namespace SSD.MakeImagesForStore
             AddTargetSquareSize(70);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         protected virtual void OnPropertyChanged(string propertyName)
         {
             if (PropertyChanged != null)
@@ -58,7 +65,7 @@ namespace SSD.MakeImagesForStore
             set
             {
                 _targetFilenameTemplate = value;
-                OnPropertyChanged("TargetFilenameTemplate");
+                OnPropertyChanged(nameof(TargetFilenameTemplate));
             }
         }
 
@@ -71,8 +78,8 @@ namespace SSD.MakeImagesForStore
                 {
                     _targetFolder = value;
 
-                    OnPropertyChanged("TargetFolder");
-                    OnPropertyChanged("CanMakeImages");
+                    OnPropertyChanged(nameof(TargetFolder));
+                    CanMakeImagesChanged();
                 }
             }
         }
@@ -87,8 +94,8 @@ namespace SSD.MakeImagesForStore
                     _selectedFile = value;
                     CreateBitmapImage();
 
-                    OnPropertyChanged("SelectedFile");
-                    OnPropertyChanged("CanMakeImages");
+                    OnPropertyChanged(nameof(SelectedFile));
+                    CanMakeImagesChanged();
                 }
             }
         }
@@ -99,21 +106,13 @@ namespace SSD.MakeImagesForStore
             set
             {
                 _image = value;
-                OnPropertyChanged("Image");
+                OnPropertyChanged(nameof(Image));
             }
         }
 
         public List<BitmapSize> TargetSizes
         {
             get { return _targetSizes; }
-        }
-
-        public bool CanMakeImages
-        {
-            get
-            {
-                return (_selectedFile != null && _targetFolder != null);
-            }
         }
 
         private async void CreateBitmapImage()
@@ -131,6 +130,42 @@ namespace SSD.MakeImagesForStore
         private void AddTargetSquareSize(uint size)
         {
             _targetSizes.Add(new BitmapSize() { Height = size, Width = size });
+        }
+
+        public bool CanMakeImages() => _selectedFile != null && _targetFolder != null;
+
+        private async void MakeImages()
+        {
+            using (var sourceStream = await _selectedFile.OpenReadAsync())
+            {
+                var decoder = await BitmapDecoder.CreateAsync(sourceStream);
+
+                using (var targetStream = new InMemoryRandomAccessStream())
+                {
+                    foreach (var targetSize in _targetSizes)
+                    {
+                        targetStream.Size = 0;
+
+                        var encoder = await BitmapEncoder.CreateForTranscodingAsync(targetStream, decoder);
+                        encoder.BitmapTransform.ScaledHeight = targetSize.Height;
+                        encoder.BitmapTransform.ScaledWidth = targetSize.Width;
+                        await encoder.FlushAsync();
+
+                        var targetFilename = $"{_targetFilenameTemplate}{targetSize.Width}x{targetSize.Height}";
+                        var targetFile = await _targetFolder.CreateFileAsync($"{targetFilename}.png", CreationCollisionOption.ReplaceExisting);
+
+                        using (var targetFileStream = await targetFile.OpenAsync(FileAccessMode.ReadWrite))
+                        {
+                            await RandomAccessStream.CopyAndCloseAsync(targetStream.GetInputStreamAt(0), targetFileStream.GetOutputStreamAt(0));
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CanMakeImagesChanged()
+        {
+            (MakeImagesCommand as CommandMake)?.RaiseCanExecuteChanged();
         }
     }
 }
