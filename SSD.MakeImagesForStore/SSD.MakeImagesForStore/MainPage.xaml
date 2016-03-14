@@ -21,14 +21,14 @@
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
             <TextBox x:Name="textBoxSourceImage" Header="Исходное изображение" Text="{Binding SelectedFile.Path, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Left" Width="300" />
-            <Button x:Name="buttonBrowseSourceImage" Content="Browse..." HorizontalAlignment="Left" VerticalAlignment="Center" Click="buttonBrowseSourceImage_Click"/>
+            <Button x:Name="buttonBrowseSourceImage" Content="Browse..." Command="{x:Bind ViewModel.BrowseSourceImageCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" />
             <Image x:Name="imageView" Source="{Binding Image, Mode=OneWay}" Width="170" Height="170"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <TextBox x:Name="textBoxTargetPath" Header="Куда складывать?" Text="{Binding TargetFolder.Path}" VerticalAlignment="Center" Width="500"/>
-            <Button x:Name="buttonBrowseTarget" Content="Browse..." Click="buttonBrowseTarget_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="100" />
-            <Button x:Name="buttonMakeImages" Content="Make" Command="{x:Bind ViewModel.MakeImagesCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="166"/>
+            <Button x:Name="buttonBrowseTarget" Content="Browse..." Command="{x:Bind ViewModel.BrowseTargetCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="100" />
+            <Button x:Name="buttonMakeImages" Content="Make" Command="{x:Bind ViewModel.MakeImagesCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="100"/>
         </StackPanel>
 
         <TextBlock x:Name="textBlockDone" Text="Done!" FontSize="50" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>

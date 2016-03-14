@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml.Media.Imaging;
 
@@ -21,15 +22,22 @@ namespace SSD.MakeImagesForStore
         private List<BitmapSize> _targetSizes = new List<BitmapSize>();
 
         public ICommand MakeImagesCommand { get; set; }
+        public ICommand BrowseSourceImageCommand { get; set; }
+        public ICommand BrowseTargetCommand { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ViewModel()
         {
             TargetFilenameTemplate = "output_";
+
             MakeImagesCommand = new CommandMake(
                 p => MakeImages(), 
                 p => CanMakeImages());
+            BrowseSourceImageCommand = new CommandBrowseSourceImage(
+                p => BrowseSourceImage());
+            BrowseTargetCommand = new CommandBrowseTarget(
+                p => BrowseTarget());
 
             AddTargetSquareSize(310);
             AddTargetSquareSize(150);
@@ -166,6 +174,37 @@ namespace SSD.MakeImagesForStore
         private void CanMakeImagesChanged()
         {
             (MakeImagesCommand as CommandMake)?.RaiseCanExecuteChanged();
+        }
+
+        private async void BrowseSourceImage()
+        {
+            FileOpenPicker filePicker = new FileOpenPicker();
+            filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            filePicker.ViewMode = PickerViewMode.Thumbnail;
+            filePicker.FileTypeFilter.Add(".jpg");
+            filePicker.FileTypeFilter.Add(".png");
+
+            StorageFile file = await filePicker.PickSingleFileAsync();
+            // for multiple selection
+            //IReadOnlyList<StorageFile> fileList = await filePicker.PickMultipleFilesAsync();
+            if (file != null)
+            {
+                SelectedFile = file;
+            }
+        }
+
+        private async void BrowseTarget()
+        {
+            FolderPicker folderPicker = new FolderPicker();
+            folderPicker.ViewMode = PickerViewMode.Thumbnail;
+            folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            folderPicker.FileTypeFilter.Add("*");
+
+            StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+            if (folder != null)
+            {
+                TargetFolder = folder;
+            }
         }
     }
 }
