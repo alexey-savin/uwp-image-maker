@@ -1,0 +1,36 @@
+﻿<Page
+    x:Class="SSD.MakeImagesForStore.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SSD.MakeImagesForStore"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.DataContext>
+        <local:ViewModel/>
+    </Page.DataContext>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextBox x:Name="textBoxSourceImage" Header="Исходное изображение" Text="{Binding SelectedFile.Path, Mode=OneWay}" VerticalAlignment="Top" HorizontalAlignment="Left" Width="300" />
+            <Button x:Name="buttonBrowseSourceImage" Content="Browse..." HorizontalAlignment="Left" VerticalAlignment="Top" Click="buttonBrowseSourceImage_Click"/>
+            <Image x:Name="imageView" Source="{Binding Image, Mode=OneWay}" Width="170" Height="170"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBox x:Name="textBoxTargetPath" Header="Куда складывать?" Text="{Binding TargetFolder.Path}" VerticalAlignment="Center" Width="500"/>
+            <Button x:Name="buttonBrowseTarget" Content="Browse..." Click="buttonBrowseTarget_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="100" />
+            <Button x:Name="buttonMakeImages" Content="Make" IsEnabled="{Binding CanMakeImages}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="buttonMakeImages_Click" Width="166"/>
+        </StackPanel>
+
+        <TextBlock x:Name="textBlockDone" Text="Done!" FontSize="50" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+    </Grid>
+</Page>
