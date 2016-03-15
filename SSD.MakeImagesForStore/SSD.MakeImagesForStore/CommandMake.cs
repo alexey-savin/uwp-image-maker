@@ -28,18 +28,12 @@ namespace SSD.MakeImagesForStore
 
         public void Execute(object parameter)
         {
-            if (ExecuteDelegate != null)
-            {
-                ExecuteDelegate(parameter);
-            }
+            ExecuteDelegate?.Invoke(parameter);
         }
 
         public void RaiseCanExecuteChanged()
         {
-            if (CanExecuteChanged != null)
-            {
-                CanExecuteChanged(this, EventArgs.Empty);
-            }
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

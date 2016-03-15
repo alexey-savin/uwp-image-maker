@@ -1,8 +1,4 @@
-﻿using System;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
+﻿using Windows.UI.Xaml.Controls;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
